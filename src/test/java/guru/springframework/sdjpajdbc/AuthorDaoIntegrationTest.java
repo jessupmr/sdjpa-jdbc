@@ -1,7 +1,7 @@
 package guru.springframework.sdjpajdbc;
 
 import guru.springframework.sdjpajdbc.dao.AuthorDao;
-import guru.springframework.sdjpajdbc.dao.AuthorDaoImpl;
+import guru.springframework.sdjpajdbc.dao.AuthorDaoJdbcTemplateImpl;
 import guru.springframework.sdjpajdbc.domain.Author;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 // this tells spring to only scan the packages we need for these tests and makes it more efficient.
 // @ComponentScan also has a bug right now and is not bringing in the desired AuthorDao dependency.
 //@ComponentScan(basePackages = {"guru.springframework.sdjpajdbc.dao"})
-@Import(AuthorDaoImpl.class)
+@Import(AuthorDaoJdbcTemplateImpl.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class AuthorDaoIntegrationTest {
 
