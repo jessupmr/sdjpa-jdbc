@@ -2,31 +2,32 @@ package guru.springframework.sdjpajdbc;
 
 import guru.springframework.sdjpajdbc.dao.AuthorDao;
 import guru.springframework.sdjpajdbc.dao.AuthorDaoImpl;
+import guru.springframework.sdjpajdbc.dao.AuthorDaoJdbcTemplateImpl;
 import guru.springframework.sdjpajdbc.domain.Author;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("local")
 @DataJpaTest
-// this tells spring to only scan the packages we need for these tests and makes it more efficient.
-// @ComponentScan also has a bug right now and is not bringing in the desired AuthorDao dependency.
-//@ComponentScan(basePackages = {"guru.springframework.sdjpajdbc.dao"})
-@Import(AuthorDaoImpl.class)
+@Import(AuthorDaoJdbcTemplateImpl.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class AuthorDaoIntegrationTest {
+public class AuthorDaoJdbcTemplateIntegrationTest {
 
     @Autowired
     AuthorDao authorDao;
     @Test
     void testGetAuthorById_Found() {
 
-        Author author = authorDao.getById(1L);
+        Author author = authorDao.getById(4L);
 
         assertThat(author).isNotNull();
     }
@@ -34,9 +35,9 @@ public class AuthorDaoIntegrationTest {
     @Test
     void testGetAuthorById_NotFound() {
 
-        Author author = authorDao.getById(0L);
-        assertThat(author).isNull();
-
+        assertThrows(TransientDataAccessResourceException.class, () -> {
+            authorDao.getById(0L);
+        });
     }
 
     @Test
@@ -49,8 +50,9 @@ public class AuthorDaoIntegrationTest {
     @Test
     void testGetAuthorByName_NotFound() {
 
-        Author author = authorDao.getByName("Mike", "Jesssup");
-        assertThat(author).isNull();
+        assertThrows(EmptyResultDataAccessException.class, () -> {
+            authorDao.getByName("Mike", "Jesssup");
+        });
 
     }
 
@@ -96,9 +98,8 @@ public class AuthorDaoIntegrationTest {
 
         authorDao.deleteAuthorById(saved.getId());
 
-        Author deleted = authorDao.getById(saved.getId());
-        assertThat(deleted).isNull();
-
+        assertThrows(TransientDataAccessResourceException.class, () -> {
+            authorDao.getById(saved.getId());
+        });
     }
-
 }
